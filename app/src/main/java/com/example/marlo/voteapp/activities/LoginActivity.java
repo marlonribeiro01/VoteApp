@@ -1,4 +1,4 @@
-package com.example.marlo.voteapp;
+package com.example.marlo.voteapp.activities;
 
 import android.content.Intent;
 import android.support.v7.app.AppCompatActivity;
@@ -7,6 +7,8 @@ import android.view.View;
 import android.widget.Button;
 import android.widget.EditText;
 import android.widget.Toast;
+
+import com.example.marlo.voteapp.R;
 
 public class LoginActivity extends AppCompatActivity
 {
@@ -95,7 +97,7 @@ public class LoginActivity extends AppCompatActivity
 
     private void goToMainActivity(int userId)
     {
-        Intent intent = new Intent(this, MainActivity.class);
+        Intent intent = new Intent(this, WelcomeActivity.class);
         Bundle params = new Bundle();
 
         params.putInt("userId",userId);
