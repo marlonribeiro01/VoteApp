@@ -1,4 +1,4 @@
-package com.example.marlo.voteapp.activities;
+package com.example.marlo.voteapp.Activities;
 
 import android.content.Intent;
 import android.support.v7.app.AppCompatActivity;
@@ -74,7 +74,17 @@ public class LoginActivity extends AppCompatActivity
             {
                 String registration = voterRegistrationEditText.getText().toString();
                 String pass = passwordEditText.getText().toString();
-                if (!registration.isEmpty() && !pass.isEmpty())
+                if(registration.isEmpty())
+                {
+                    Toast.makeText(getApplicationContext(), "Enter Voter Registration", Toast.LENGTH_SHORT).show();
+                    return;
+                }
+                else if(pass.isEmpty())
+                {
+                    Toast.makeText(getApplicationContext(), "Enter Password", Toast.LENGTH_SHORT).show();
+                    return;
+                }
+                else
                 {
                     int userId = authenticate(registration, pass);
                     if (userId == 0)
@@ -85,7 +95,7 @@ public class LoginActivity extends AppCompatActivity
                     {
                         goToMainActivity(userId);
                     }
-
+                    return;
                 }
             }
         };
@@ -109,7 +119,7 @@ public class LoginActivity extends AppCompatActivity
     private int authenticate(String registration, String pass)
     {
         /* Connect to server here and authenticate */
-        /* return CourierID */
+        /* return Elector Id */
         return 1;
     }
 

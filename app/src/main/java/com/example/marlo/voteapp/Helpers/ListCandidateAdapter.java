@@ -1,4 +1,4 @@
-package com.example.marlo.voteapp.helpers;
+package com.example.marlo.voteapp.Helpers;
 
 import android.content.Context;
 import android.view.LayoutInflater;
@@ -9,14 +9,14 @@ import android.widget.ImageView;
 import android.widget.TextView;
 
 import com.example.marlo.voteapp.R;
-import com.example.marlo.voteapp.models.Candidate;
+import com.example.marlo.voteapp.Models.Candidate;
 
 import java.util.ArrayList;
 
 
-public class ListItemAdapter extends ArrayAdapter <Candidate>
+public class ListCandidateAdapter extends ArrayAdapter <Candidate>
 {
-    public ListItemAdapter(Context context, ArrayList<Candidate> candidates)
+    public ListCandidateAdapter(Context context, ArrayList<Candidate> candidates)
     {
         super(context, 0, candidates);
     }

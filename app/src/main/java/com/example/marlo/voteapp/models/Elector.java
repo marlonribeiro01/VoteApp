@@ -1,4 +1,4 @@
-package com.example.marlo.voteapp.models;
+package com.example.marlo.voteapp.Models;
 
 /**
  * Created by marlo on 20/10/2016.
@@ -26,6 +26,11 @@ public class Elector
         this.password = password;
         this.aldermanId = aldermanId;
         this.mayorId = mayorId;
+    }
+
+    public Elector(int id)
+    {
+        this.id = id;
     }
 
     //endregion

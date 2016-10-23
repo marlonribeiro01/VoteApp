@@ -1,4 +1,4 @@
-package com.example.marlo.voteapp.models;
+package com.example.marlo.voteapp.Models;
 
 /**
  * Created by marlo on 20/10/2016.
@@ -30,12 +30,13 @@ public class Candidate
 
     //region [ Constructors ]
 
-    public Candidate(int id, String name, String party, String image)
+    public Candidate(int id, String name, String party, String image, CandidateType type)
     {
         this.id = id;
         this.name = name;
         this.party = party;
         this.image = image;
+        this.type = type;
     }
 
     //endregion
