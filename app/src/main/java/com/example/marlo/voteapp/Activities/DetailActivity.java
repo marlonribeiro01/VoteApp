@@ -1,5 +1,6 @@
 package com.example.marlo.voteapp.Activities;
 
+import android.app.ProgressDialog;
 import android.content.Intent;
 import android.os.Bundle;
 import android.support.design.widget.FloatingActionButton;
@@ -7,9 +8,11 @@ import android.support.design.widget.Snackbar;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
 import android.view.View;
+import android.widget.ImageView;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import com.example.marlo.voteapp.Helpers.DownloadImageTask;
 import com.example.marlo.voteapp.Helpers.StaticHelper;
 import com.example.marlo.voteapp.Models.Candidate;
 import com.example.marlo.voteapp.R;
@@ -28,6 +31,7 @@ public class DetailActivity extends AppCompatActivity
     private Candidate.CandidateType currentCandidateType;
     private Candidate currentCandidate;
     private TextView aboutTextView;
+    private ImageView imageView;
 
     //endregion
 
@@ -43,6 +47,21 @@ public class DetailActivity extends AppCompatActivity
         setTexts();
     }
 
+    @Override
+    protected void onStart()
+    {
+        super.onStart();
+        ProgressDialog progressDialog = new ProgressDialog(DetailActivity.this);
+        progressDialog.setMessage("Loading image...");
+        progressDialog.setCancelable(false);
+        progressDialog.show();
+
+        DownloadImageTask downloadImageTask = new DownloadImageTask(imageView);
+        downloadImageTask.execute(currentCandidate.getImage());
+
+        progressDialog.dismiss();
+    }
+
     //endregion
 
     //region [ Setup Activity ]
@@ -54,6 +73,8 @@ public class DetailActivity extends AppCompatActivity
         setSupportActionBar(toolbar);
         fab = (FloatingActionButton) findViewById(R.id.fab);
         aboutTextView = (TextView) findViewById(R.id.aboutTextView);
+        imageView = (ImageView)findViewById(R.id.imageView);
+
     }
 
     private void setupListeners()

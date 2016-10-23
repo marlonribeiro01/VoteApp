@@ -61,6 +61,7 @@ public class WelcomeActivity extends AppCompatActivity
 
     private void goToList(Candidate.CandidateType candidateType)
     {
+
         Intent intent = new Intent(this, ListActivity.class);
         Bundle params = new Bundle();
         params.putString("candidateType",candidateType.name());

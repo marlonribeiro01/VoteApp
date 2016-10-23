@@ -13,12 +13,21 @@ import java.util.Arrays;
 public class StaticHelper
 {
 
+    public static String mayorsUrl = "https://dl.dropboxusercontent.com/u/40990541/prefeito.json";
+    public static String aldermenUrl = "https://dl.dropboxusercontent.com/u/40990541/vereador.json";
+    public static String mayorsArrayName = "prefeito";
+    public static String aldermenArrayName = "vereador";
+
+    public static ArrayList<Candidate> Candidates = new ArrayList<Candidate>();
+
+    public static Elector CurrentElector = new Elector(1);
+    /*
     public static ArrayList<Candidate> Candidates = new ArrayList<Candidate>(Arrays.asList(
             new Candidate(1, "Marlon", "ALDERMAN", "Whatever", Candidate.CandidateType.ALDERMAN),
             new Candidate(2, "Mari", "ALDERMAN", "Whatever", Candidate.CandidateType.ALDERMAN),
             new Candidate(1, "Marlon", "MAYOR", "Whatever", Candidate.CandidateType.MAYOR),
             new Candidate(2, "Mari", "MAYOR", "Whatever", Candidate.CandidateType.MAYOR)
     ));
+    */
 
-    public static Elector CurrentElector = new Elector(1);
 }

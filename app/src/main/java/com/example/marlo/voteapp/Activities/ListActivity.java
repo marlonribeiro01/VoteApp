@@ -1,7 +1,10 @@
 package com.example.marlo.voteapp.Activities;
 
 
+import android.app.ProgressDialog;
+import android.content.Context;
 import android.content.Intent;
+import android.os.AsyncTask;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.view.Menu;
@@ -11,10 +14,15 @@ import android.view.View;
 import android.widget.AdapterView;
 import android.widget.ListView;
 
+import com.example.marlo.voteapp.Helpers.HttpHandler;
 import com.example.marlo.voteapp.Helpers.ListCandidateAdapter;
 import com.example.marlo.voteapp.Helpers.StaticHelper;
 import com.example.marlo.voteapp.Models.Candidate;
 import com.example.marlo.voteapp.R;
+
+import org.json.JSONArray;
+import org.json.JSONException;
+import org.json.JSONObject;
 
 import java.util.ArrayList;
 
@@ -29,10 +37,11 @@ public class ListActivity extends AppCompatActivity
     private AdapterView.OnItemClickListener onClickListener;
     private Candidate.CandidateType candidateType;
     private boolean isLookup;
+    private ProgressDialog progressDialog;
 
     //endregion
 
-    //region [ Setup Activity ]
+    //region [ Life Cycle ]
 
     protected void onCreate(Bundle savedInstanceState)
     {
@@ -43,6 +52,21 @@ public class ListActivity extends AppCompatActivity
         this.setupListeners();
         this.setupEventHandlers();
     }
+
+    @Override
+    protected void onStart()
+    {
+        super.onStart();
+        if(this.itemsSource.size() == 0)
+        {
+            CandidatesReader candidatesReader = new CandidatesReader(ListActivity.this, candidateType);
+            candidatesReader.execute();
+        }
+    }
+
+    //endregion
+
+    //region [ Setup Activity ]
 
     /* Setup values from content view */
     private void setupContentView()
@@ -55,8 +79,19 @@ public class ListActivity extends AppCompatActivity
     private void setupListAdapter()
     {
         this.populateItemsSource();
+        /*
+        progressDialog = new ProgressDialog(ListActivity.this);
+        progressDialog.setMessage("Downloading images...");
+        progressDialog.setCancelable(false);
+        progressDialog.show();
+        */
+
         this.adapter = new ListCandidateAdapter(this, itemsSource);
         this.listView.setAdapter((this.adapter));
+
+        /*
+        progressDialog.dismiss();
+        */
     }
 
     /* Setup listeners */
@@ -64,7 +99,6 @@ public class ListActivity extends AppCompatActivity
     {
         onClickListener = new AdapterView.OnItemClickListener()
         {
-
             @Override
             public void onItemClick(AdapterView<?> parent, View view, int position, long id)
             {
@@ -195,6 +229,94 @@ public class ListActivity extends AppCompatActivity
         Intent i = new Intent (this, LoginActivity.class);
         i.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
         startActivity(i);
+    }
+
+    //endregion
+
+    //region [ Candidates Reader ]
+
+    public class CandidatesReader extends AsyncTask<Void, Void, Void>
+    {
+
+        private Context context;
+        private String url;
+        private String arrayName;
+        private Candidate.CandidateType candidateType;
+
+        public CandidatesReader(Context context, Candidate.CandidateType candidateType)
+        {
+            this.context = context;
+            this.candidateType = candidateType;
+
+            if (candidateType.equals(Candidate.CandidateType.ALDERMAN))
+            {
+                this.url = StaticHelper.aldermenUrl;
+                this.arrayName = StaticHelper.aldermenArrayName;
+            }
+            else if (candidateType.equals(Candidate.CandidateType.MAYOR))
+            {
+                this.url = StaticHelper.mayorsUrl;
+                this.arrayName = StaticHelper.mayorsArrayName;
+            }
+        }
+
+        @Override
+        protected Void doInBackground(Void... voids)
+        {
+            HttpHandler handler = new HttpHandler();
+            String jsonStr = handler.makeServiceCall(url);
+
+            if(jsonStr != null)
+            {
+                JSONObject jsonObj = null;
+                try
+                {
+                    jsonObj = new JSONObject(jsonStr);
+                    JSONArray candidates = jsonObj.getJSONArray(arrayName);
+
+                    for(int i = 0; i < candidates.length(); i++)
+                    {
+                        JSONObject c = candidates.getJSONObject(i);
+
+                        String id = c.getString("id");
+                        String name = c.getString("nome");
+                        String party = c.getString("partido");
+                        String image = c.getString("foto");
+
+                        Candidate candidate = new Candidate(Integer.parseInt(id),name,party,image,candidateType);
+
+                        StaticHelper.Candidates.add(candidate);
+
+                    }
+                }
+                catch (JSONException e)
+                {
+                    e.printStackTrace();
+                }
+            }
+            return null;
+        }
+
+        @Override
+        protected void onPreExecute()
+        {
+            super.onPreExecute();
+            progressDialog = new ProgressDialog(context);
+            progressDialog.setMessage("Downloading...");
+            progressDialog.setCancelable(false);
+            progressDialog.show();
+        }
+
+        @Override
+        protected void onPostExecute(Void aVoid)
+        {
+            super.onPostExecute(aVoid);
+
+            setupListAdapter();
+            if(progressDialog.isShowing())
+                progressDialog.dismiss();
+
+        }
     }
 
     //endregion

@@ -35,6 +35,8 @@ public class ListCandidateAdapter extends ArrayAdapter <Candidate>
         TextView candidatePartyView = (TextView) convertView.findViewById(R.id.candidatePartyView);
         ImageView candidateImageView =  (ImageView) convertView.findViewById(R.id.candidateImageView);
 
+        DownloadImageTask downloadImageTask = new DownloadImageTask(candidateImageView);
+        downloadImageTask.execute(candidate.getImage());
         candidateNameView.setText(candidate.getName());
         candidatePartyView.setText(candidate.getParty());
         //itemImageView.setImageResource(candidate.getImage());
