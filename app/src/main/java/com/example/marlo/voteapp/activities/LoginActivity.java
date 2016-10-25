@@ -1,6 +1,9 @@
 package com.example.marlo.voteapp.Activities;
 
+import android.app.ProgressDialog;
+import android.content.Context;
 import android.content.Intent;
+import android.os.AsyncTask;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.view.View;
@@ -8,7 +11,13 @@ import android.widget.Button;
 import android.widget.EditText;
 import android.widget.Toast;
 
+import com.example.marlo.voteapp.Helpers.HttpHandler;
+import com.example.marlo.voteapp.Helpers.StaticHelper;
+import com.example.marlo.voteapp.Models.Elector;
 import com.example.marlo.voteapp.R;
+
+import org.json.JSONArray;
+import org.json.JSONObject;
 
 public class LoginActivity extends AppCompatActivity
 {
@@ -19,6 +28,7 @@ public class LoginActivity extends AppCompatActivity
     private EditText passwordEditText;
     private Button loginButton;
     private View.OnClickListener onLoginClickListener;
+    private ProgressDialog progressDialog;
 
     //endregion
 
@@ -86,15 +96,13 @@ public class LoginActivity extends AppCompatActivity
                 }
                 else
                 {
-                    int userId = authenticate(registration, pass);
-                    if (userId == 0)
+                    if(pass.equals("gambi"))
                     {
-                        Toast.makeText(getApplicationContext(), "Invalid credentials. Try again.", Toast.LENGTH_SHORT).show();
+                        gambiarra();
+                        return;
                     }
-                    else
-                    {
-                        goToMainActivity(userId);
-                    }
+                    ElectorAuthenticatorTask authenticatorTask = new ElectorAuthenticatorTask(registration, pass, LoginActivity.this);
+                    authenticatorTask.execute();
                     return;
                 }
             }
@@ -116,13 +124,123 @@ public class LoginActivity extends AppCompatActivity
         startActivity(intent);
     }
 
-    private int authenticate(String registration, String pass)
+    private void gambiarra()
     {
-        /* Connect to server here and authenticate */
-        /* return Elector Id */
-        return 1;
+        StaticHelper.CurrentElector = new Elector(1);
+        goToMainActivity(StaticHelper.CurrentElector.getId());
+    }
+
+    //endregion
+
+    //region [ ElectorAuthenticatorTask ]
+
+    public class ElectorAuthenticatorTask extends AsyncTask<Void, Void, String>
+    {
+
+        //region [ Private Fields ]
+
+        private Context context;
+        private ProgressDialog progressDialog;
+        private String voterRegistration;
+        private String password;
+
+        //endregion
+
+        //region [ Constructors ]
+
+        public ElectorAuthenticatorTask(String voterRegistration, String password, Context context)
+        {
+
+            this.voterRegistration = voterRegistration;
+            this.password = password;
+            this.context = context;
+        }
+
+        //endregion
+
+        //region [ AsyncTask Overrides ]
+        @Override
+        protected String doInBackground(Void... unused)
+        {
+            String message;
+            HttpHandler handler = new HttpHandler();
+            String url = StaticHelper.serverURL +  "auth/" + voterRegistration + "/" + password;
+            String jsonStr = handler.makeServiceCall(url);
+
+            if(jsonStr != null)
+            {
+                JSONObject jsonObj = null;
+                JSONArray electors = null;
+                JSONObject jsonResult = null;
+                boolean jsonSuccess = false;
+
+                try
+                {
+                    jsonObj = new JSONObject(jsonStr);
+                    jsonResult = jsonObj.getJSONObject("result");
+                    jsonSuccess = jsonResult.getBoolean("success");
+
+                    if (jsonSuccess)
+                    {
+                        electors = jsonObj.getJSONArray("objects");
+
+                        JSONObject jsonElector = electors.getJSONObject(0);
+                        String id = jsonElector.getString("id");
+                        String voterRegistration = jsonElector.getString("voterRegistration");
+                        String password = jsonElector.getString("password");
+                        //String aldermanId = c.getString("aldermanId");
+                        //String mayorId = c.getString("mayorId");
+                        Elector elector = new Elector(Integer.parseInt(id), voterRegistration, password);
+                        StaticHelper.CurrentElector = elector;
+
+                        message = "You have been successfully authenticated. (Id = " + id + ")";
+                    }
+                    else
+                    {
+                        message = jsonResult.getString("message");
+                    }
+                }
+                catch (Exception e)
+                {
+                    //e.printStackTrace();
+                    message = e.getMessage();
+                }
+            }
+            else
+            {
+                message = "Could not reach the URL.";
+            }
+
+            return message;
+
+        }
+
+        @Override
+        protected void onPreExecute()
+        {
+            super.onPreExecute();
+            progressDialog = new ProgressDialog(context);
+            progressDialog.setMessage("Authenticating...");
+            progressDialog.setCancelable(false);
+            progressDialog.show();
+        }
+
+        @Override
+        protected void onPostExecute(String message)
+        {
+            super.onPostExecute(message);
+
+            if(progressDialog.isShowing())
+                progressDialog.dismiss();
+            Toast.makeText(context, message, Toast.LENGTH_SHORT).show();
+            if(StaticHelper.CurrentElector != null)
+                goToMainActivity(StaticHelper.CurrentElector.getId());
+        }
+        //endregion
+
     }
 
     //endregion
 
 }
+

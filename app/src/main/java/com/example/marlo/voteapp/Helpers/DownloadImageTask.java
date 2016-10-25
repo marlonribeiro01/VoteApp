@@ -23,15 +23,17 @@ public class DownloadImageTask extends AsyncTask<String, Void, Bitmap>
     private Context context;
     private ImageView imageView;
     private ProgressDialog progressDialog;
+    private boolean showLoading;
 
     //endregion
 
     //region [ Constructors ]
 
-    public DownloadImageTask(ImageView imageView, Context context)
+    public DownloadImageTask(ImageView imageView, Context context, boolean showLoading)
     {
         this.imageView = imageView;
         this.context = context;
+        this.showLoading = showLoading;
     }
 
     //endregion
@@ -60,21 +62,25 @@ public class DownloadImageTask extends AsyncTask<String, Void, Bitmap>
     protected void onPostExecute(Bitmap result)
     {
         imageView.setImageBitmap(result);
-        if(progressDialog.isShowing())
-            progressDialog.dismiss();
+        if(showLoading)
+            if(progressDialog.isShowing())
+                progressDialog.dismiss();
     }
 
     @Override
     protected void onPreExecute()
     {
         super.onPreExecute();
-        progressDialog = new ProgressDialog(context);
-        progressDialog.setMessage("Authenticating...");
-        progressDialog.setCancelable(false);
-        progressDialog.show();
+        if(showLoading)
+        {
+            progressDialog = new ProgressDialog(context);
+            progressDialog.setMessage("Loading image...");
+            progressDialog.setCancelable(false);
+            progressDialog.show();
+        }
+
     }
 
     //endregion
-
 
 }

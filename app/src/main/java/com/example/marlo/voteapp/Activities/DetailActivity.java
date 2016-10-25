@@ -53,7 +53,7 @@ public class DetailActivity extends AppCompatActivity
     {
         super.onStart();
 
-        DownloadImageTask downloadImageTask = new DownloadImageTask(imageView,DetailActivity.this);
+        DownloadImageTask downloadImageTask = new DownloadImageTask(imageView,DetailActivity.this, true);
         downloadImageTask.execute(currentCandidate.getImage());
 
     }

@@ -6,7 +6,10 @@ import android.os.Bundle;
 import android.view.Menu;
 import android.view.MenuInflater;
 import android.view.MenuItem;
+import android.widget.EditText;
+import android.widget.TextView;
 
+import com.example.marlo.voteapp.Helpers.StaticHelper;
 import com.example.marlo.voteapp.Models.Candidate;
 import com.example.marlo.voteapp.R;
 
@@ -19,7 +22,14 @@ public class WelcomeActivity extends AppCompatActivity
     protected void onCreate(Bundle savedInstanceState)
     {
         super.onCreate(savedInstanceState);
+        setupContentView();
+    }
+
+    private void setupContentView()
+    {
         setContentView(R.layout.activity_welcome);
+        TextView userTextView = (TextView) findViewById(R.id.userTextView);
+        userTextView.setText("Currend logged in Elector: " + StaticHelper.CurrentElector.getId());
     }
 
     //endregion

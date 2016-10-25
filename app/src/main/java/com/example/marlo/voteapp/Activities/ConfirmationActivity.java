@@ -1,7 +1,11 @@
 package com.example.marlo.voteapp.Activities;
 
+import android.app.ProgressDialog;
+import android.content.Context;
+import android.content.DialogInterface;
 import android.content.Intent;
 import android.os.AsyncTask;
+import android.support.v7.app.AlertDialog;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.util.Log;
@@ -125,8 +129,10 @@ public class ConfirmationActivity extends AppCompatActivity
             jsonElector.put("password", e.getPassword());
             jsonElector.put("aldermanId", String.valueOf(e.getAldermanId()));
             jsonElector.put("mayorId", String.valueOf(e.getMayorId()));
-            new SendElectorTask().execute(StaticHelper.serverURL, jsonElector.toString());
-        } catch (JSONException e) {
+            new SendElectorTask(ConfirmationActivity.this).execute(StaticHelper.serverURL, jsonElector.toString());
+        }
+        catch (JSONException e)
+        {
             e.printStackTrace();
         }
     }
@@ -142,7 +148,16 @@ public class ConfirmationActivity extends AppCompatActivity
         else if(StaticHelper.CurrentElector.getMayorId() == 0)
             Toast.makeText(getApplicationContext(), "You have to choose a Mayor.", Toast.LENGTH_SHORT).show();
         else
-            Toast.makeText(getApplicationContext(), "Vote confirmed!", Toast.LENGTH_SHORT).show();
+            sendJson();
+
+    }
+
+    private void showAlertDialog(String message)
+    {
+        AlertDialog alertDialog = new AlertDialog.Builder(ConfirmationActivity.this).create();
+        alertDialog.setTitle("Successful!");
+        alertDialog.setMessage(message);
+        alertDialog.show();
     }
 
     private void editCandidate(Candidate candidate)
@@ -170,6 +185,24 @@ public class ConfirmationActivity extends AppCompatActivity
 
     private class SendElectorTask extends AsyncTask<String, Void, String>
     {
+
+        //region [ Private Fields ]
+
+        private ProgressDialog progressDialog;
+        private Context context;
+
+        //endregion
+
+        //region [ Constructors ]
+
+        private SendElectorTask(Context context)
+        {
+            this.context = context;
+        }
+
+        //endregion
+
+        //region [ AsyncTask Overrides ]
 
         @Override
         protected String doInBackground(String... params) {
@@ -200,6 +233,7 @@ public class ConfirmationActivity extends AppCompatActivity
                 }
             } catch (Exception e) {
                 e.printStackTrace();
+                data = null;
             } finally {
                 if (httpURLConnection != null) {
                     httpURLConnection.disconnect();
@@ -212,8 +246,27 @@ public class ConfirmationActivity extends AppCompatActivity
         @Override
         protected void onPostExecute(String result) {
             super.onPostExecute(result);
+            if(progressDialog.isShowing())
+                progressDialog.dismiss();
             Log.e("TAG", result); // this is expecting a response code to be sent from your server upon receiving the POST data
+
+            if (result == null)
+                showAlertDialog("Could not send your vote. Check yout connection status and try again.");
+            else
+                showAlertDialog("Your vote was sent successfully!");
         }
+
+        @Override
+        protected void onPreExecute()
+        {
+            super.onPreExecute();
+            progressDialog = new ProgressDialog(context);
+            progressDialog.setMessage("Sending to server...");
+            progressDialog.setCancelable(false);
+            progressDialog.show();
+        }
+
+        //endregion
     }
 
     //endregion
