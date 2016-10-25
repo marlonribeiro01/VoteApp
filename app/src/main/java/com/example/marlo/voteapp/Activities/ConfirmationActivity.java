@@ -1,8 +1,10 @@
 package com.example.marlo.voteapp.Activities;
 
 import android.content.Intent;
+import android.os.AsyncTask;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
+import android.util.Log;
 import android.view.View;
 import android.widget.AdapterView;
 import android.widget.Button;
@@ -12,9 +14,20 @@ import android.widget.Toast;
 import com.example.marlo.voteapp.Helpers.ListCandidateAdapter;
 import com.example.marlo.voteapp.Helpers.StaticHelper;
 import com.example.marlo.voteapp.Models.Candidate;
+import com.example.marlo.voteapp.Models.Elector;
 import com.example.marlo.voteapp.R;
 
+import org.json.JSONException;
+import org.json.JSONObject;
+
+import java.io.DataOutputStream;
+import java.io.InputStream;
+import java.io.InputStreamReader;
+import java.net.HttpURLConnection;
+import java.net.URL;
 import java.util.ArrayList;
+
+import static android.R.attr.type;
 
 public class ConfirmationActivity extends AppCompatActivity
 {
@@ -101,6 +114,23 @@ public class ConfirmationActivity extends AppCompatActivity
         confirmButton.setOnClickListener(onConfirmButtonClickListener);
     }
 
+    private void sendJson()
+    {
+        JSONObject jsonElector = new JSONObject();
+        try
+        {
+            Elector e = StaticHelper.CurrentElector;
+            jsonElector.put("id", String.valueOf(e.getId()));
+            jsonElector.put("voterRegistration", e.getVoterRegistration());
+            jsonElector.put("password", e.getPassword());
+            jsonElector.put("aldermanId", String.valueOf(e.getAldermanId()));
+            jsonElector.put("mayorId", String.valueOf(e.getMayorId()));
+            new SendElectorTask().execute(StaticHelper.serverURL, jsonElector.toString());
+        } catch (JSONException e) {
+            e.printStackTrace();
+        }
+    }
+
     //endregion
 
     //region [ Private Methods ]
@@ -132,6 +162,58 @@ public class ConfirmationActivity extends AppCompatActivity
             if(( StaticHelper.CurrentElector.getAldermanId() == c.getId() && c.getType().equals(Candidate.CandidateType.ALDERMAN)) ||
                     (StaticHelper.CurrentElector.getMayorId() == c.getId() && c.getType().equals(Candidate.CandidateType.MAYOR)))
                 itemsSource.add(c);
+    }
+
+    //endregion
+
+    //region [ SendElectorTask ]
+
+    private class SendElectorTask extends AsyncTask<String, Void, String>
+    {
+
+        @Override
+        protected String doInBackground(String... params) {
+
+            String data = "";
+
+            HttpURLConnection httpURLConnection = null;
+            try {
+
+                httpURLConnection = (HttpURLConnection) new URL(params[0]).openConnection();
+                httpURLConnection.setRequestMethod("PUT");
+
+                httpURLConnection.setDoOutput(true);
+
+                DataOutputStream wr = new DataOutputStream(httpURLConnection.getOutputStream());
+                wr.writeBytes("elector=" + params[1]);
+                wr.flush();
+                wr.close();
+
+                InputStream in = httpURLConnection.getInputStream();
+                InputStreamReader inputStreamReader = new InputStreamReader(in);
+
+                int inputStreamData = inputStreamReader.read();
+                while (inputStreamData != -1) {
+                    char current = (char) inputStreamData;
+                    inputStreamData = inputStreamReader.read();
+                    data += current;
+                }
+            } catch (Exception e) {
+                e.printStackTrace();
+            } finally {
+                if (httpURLConnection != null) {
+                    httpURLConnection.disconnect();
+                }
+            }
+
+            return data;
+        }
+
+        @Override
+        protected void onPostExecute(String result) {
+            super.onPostExecute(result);
+            Log.e("TAG", result); // this is expecting a response code to be sent from your server upon receiving the POST data
+        }
     }
 
     //endregion

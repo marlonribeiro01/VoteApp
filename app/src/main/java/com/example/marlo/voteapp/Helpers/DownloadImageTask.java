@@ -1,10 +1,13 @@
 package com.example.marlo.voteapp.Helpers;
 
+import android.app.ProgressDialog;
+import android.content.Context;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.os.AsyncTask;
 import android.util.Log;
 import android.widget.ImageView;
+import android.widget.Toast;
 
 import java.io.InputStream;
 
@@ -15,13 +18,27 @@ import java.io.InputStream;
 public class DownloadImageTask extends AsyncTask<String, Void, Bitmap>
 {
 
-    ImageView imageView;
+    //region [ Private Fields ]
 
-    public DownloadImageTask(ImageView imageView)
+    private Context context;
+    private ImageView imageView;
+    private ProgressDialog progressDialog;
+
+    //endregion
+
+    //region [ Constructors ]
+
+    public DownloadImageTask(ImageView imageView, Context context)
     {
         this.imageView = imageView;
+        this.context = context;
     }
 
+    //endregion
+
+    //region [ AsyncTask Overrides ]
+
+    @Override
     protected Bitmap doInBackground(String... urls)
     {
         String urldisplay = urls[0];
@@ -39,8 +56,25 @@ public class DownloadImageTask extends AsyncTask<String, Void, Bitmap>
         return mIcon11;
     }
 
+    @Override
     protected void onPostExecute(Bitmap result)
     {
         imageView.setImageBitmap(result);
+        if(progressDialog.isShowing())
+            progressDialog.dismiss();
     }
+
+    @Override
+    protected void onPreExecute()
+    {
+        super.onPreExecute();
+        progressDialog = new ProgressDialog(context);
+        progressDialog.setMessage("Authenticating...");
+        progressDialog.setCancelable(false);
+        progressDialog.show();
+    }
+
+    //endregion
+
+
 }

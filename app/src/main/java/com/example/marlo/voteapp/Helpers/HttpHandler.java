@@ -14,10 +14,8 @@ import java.net.URL;
 
 public class HttpHandler
 {
-    public HttpHandler()
-    {
 
-    }
+    //region [ Public Methods ]
 
     public String makeServiceCall(String requestUrl)
     {
@@ -37,6 +35,10 @@ public class HttpHandler
         }
         return response;
     }
+
+    //endregion
+
+    //region [ Private Methods ]
 
     private String convertStreamToString(InputStream stream)
     {
@@ -66,4 +68,7 @@ public class HttpHandler
         }
         return sb.toString();
     }
+
+    //endregion
+
 }

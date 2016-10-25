@@ -16,12 +16,25 @@ import java.util.ArrayList;
 
 public class ListCandidateAdapter extends ArrayAdapter <Candidate>
 {
+
+    //region [ Private Fields ]
+
+    private Context context;
+
+    //endregion
+
+    //region [ Constructors ]
+
     public ListCandidateAdapter(Context context, ArrayList<Candidate> candidates)
     {
         super(context, 0, candidates);
+        this.context = context;
     }
 
-    /* Inflate layout with Candidate properties */
+    //endregion
+
+    //region [ ArrayAdapter Overrides ]
+
     @Override
     public View getView(int position, View convertView, ViewGroup parent)
     {
@@ -35,7 +48,7 @@ public class ListCandidateAdapter extends ArrayAdapter <Candidate>
         TextView candidatePartyView = (TextView) convertView.findViewById(R.id.candidatePartyView);
         ImageView candidateImageView =  (ImageView) convertView.findViewById(R.id.candidateImageView);
 
-        DownloadImageTask downloadImageTask = new DownloadImageTask(candidateImageView);
+        DownloadImageTask downloadImageTask = new DownloadImageTask(candidateImageView,context);
         downloadImageTask.execute(candidate.getImage());
         candidateNameView.setText(candidate.getName());
         candidatePartyView.setText(candidate.getParty());
@@ -43,4 +56,7 @@ public class ListCandidateAdapter extends ArrayAdapter <Candidate>
 
         return convertView;
     }
+
+    //endregion
+
 }

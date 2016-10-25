@@ -12,20 +12,27 @@ public class Elector
     private int id;
     private String voterRegistration;
     private String password;
-    private int aldermanId;
-    private int mayorId;
+    private Integer aldermanId;
+    private Integer mayorId;
 
     //endregion
 
     //region [ Constructors ]
 
-    public Elector(int id, String voterRegistration, String password, int aldermanId, int mayorId)
+    public Elector(int id, String voterRegistration, String password, Integer aldermanId, Integer mayorId)
     {
         this.id = id;
         this.voterRegistration = voterRegistration;
         this.password = password;
         this.aldermanId = aldermanId;
         this.mayorId = mayorId;
+    }
+
+    public Elector(int id, String voterRegistration, String password)
+    {
+        this.id = id;
+        this.voterRegistration = voterRegistration;
+        this.password = password;
     }
 
     public Elector(int id)

@@ -59,7 +59,7 @@ public class ListActivity extends AppCompatActivity
         super.onStart();
         if(this.itemsSource.size() == 0)
         {
-            CandidatesReader candidatesReader = new CandidatesReader(ListActivity.this, candidateType);
+            CandidatesReaderTask candidatesReader = new CandidatesReaderTask(ListActivity.this, candidateType);
             candidatesReader.execute();
         }
     }
@@ -233,17 +233,23 @@ public class ListActivity extends AppCompatActivity
 
     //endregion
 
-    //region [ Candidates Reader ]
+    //region [ CandidatesReaderTask ]
 
-    public class CandidatesReader extends AsyncTask<Void, Void, Void>
+    public class CandidatesReaderTask extends AsyncTask<Void, Void, Void>
     {
+
+        //region [ Private Fields ]
 
         private Context context;
         private String url;
         private String arrayName;
         private Candidate.CandidateType candidateType;
 
-        public CandidatesReader(Context context, Candidate.CandidateType candidateType)
+        //endregion
+
+        //region [ Constructors ]
+
+        public CandidatesReaderTask(Context context, Candidate.CandidateType candidateType)
         {
             this.context = context;
             this.candidateType = candidateType;
@@ -259,6 +265,10 @@ public class ListActivity extends AppCompatActivity
                 this.arrayName = StaticHelper.mayorsArrayName;
             }
         }
+
+        //endregion
+
+        //region [ AsyncTask Overrides ]
 
         @Override
         protected Void doInBackground(Void... voids)
@@ -317,6 +327,8 @@ public class ListActivity extends AppCompatActivity
                 progressDialog.dismiss();
 
         }
+
+        //endregion
     }
 
     //endregion

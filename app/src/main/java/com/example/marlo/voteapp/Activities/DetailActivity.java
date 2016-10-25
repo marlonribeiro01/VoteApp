@@ -41,6 +41,7 @@ public class DetailActivity extends AppCompatActivity
     protected void onCreate(Bundle savedInstanceState)
     {
         super.onCreate(savedInstanceState);
+
         setupContentView();
         getParams();
         setupListeners();
@@ -51,15 +52,10 @@ public class DetailActivity extends AppCompatActivity
     protected void onStart()
     {
         super.onStart();
-        ProgressDialog progressDialog = new ProgressDialog(DetailActivity.this);
-        progressDialog.setMessage("Loading image...");
-        progressDialog.setCancelable(false);
-        progressDialog.show();
 
-        DownloadImageTask downloadImageTask = new DownloadImageTask(imageView);
+        DownloadImageTask downloadImageTask = new DownloadImageTask(imageView,DetailActivity.this);
         downloadImageTask.execute(currentCandidate.getImage());
 
-        progressDialog.dismiss();
     }
 
     //endregion
