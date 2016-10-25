@@ -127,6 +127,8 @@ public class LoginActivity extends AppCompatActivity
     private void gambiarra()
     {
         StaticHelper.CurrentElector = new Elector(1);
+        StaticHelper.CurrentElector.setMayorId(1);
+        StaticHelper.CurrentElector.setAldermanId(2);
         goToMainActivity(StaticHelper.CurrentElector.getId());
     }
 

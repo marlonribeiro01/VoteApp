@@ -15,20 +15,24 @@ import android.widget.Button;
 import android.widget.ListView;
 import android.widget.Toast;
 
+import com.example.marlo.voteapp.Helpers.HttpHandler;
 import com.example.marlo.voteapp.Helpers.ListCandidateAdapter;
 import com.example.marlo.voteapp.Helpers.StaticHelper;
 import com.example.marlo.voteapp.Models.Candidate;
 import com.example.marlo.voteapp.Models.Elector;
 import com.example.marlo.voteapp.R;
 
+import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 
 import java.io.DataOutputStream;
 import java.io.InputStream;
 import java.io.InputStreamReader;
+import java.io.OutputStreamWriter;
 import java.net.HttpURLConnection;
 import java.net.URL;
+import java.net.URLEncoder;
 import java.util.ArrayList;
 
 import static android.R.attr.type;
@@ -120,6 +124,7 @@ public class ConfirmationActivity extends AppCompatActivity
 
     private void sendJson()
     {
+        //JSONArray jsonArray = new JSONArray();
         JSONObject jsonElector = new JSONObject();
         try
         {
@@ -129,6 +134,7 @@ public class ConfirmationActivity extends AppCompatActivity
             jsonElector.put("password", e.getPassword());
             jsonElector.put("aldermanId", String.valueOf(e.getAldermanId()));
             jsonElector.put("mayorId", String.valueOf(e.getMayorId()));
+            //jsonElector.toJSONArray()
             new SendElectorTask(ConfirmationActivity.this).execute(StaticHelper.serverURL, jsonElector.toString());
         }
         catch (JSONException e)
@@ -155,7 +161,7 @@ public class ConfirmationActivity extends AppCompatActivity
     private void showAlertDialog(String message)
     {
         AlertDialog alertDialog = new AlertDialog.Builder(ConfirmationActivity.this).create();
-        alertDialog.setTitle("Successful!");
+        alertDialog.setTitle("Send to server:");
         alertDialog.setMessage(message);
         alertDialog.show();
     }
@@ -209,34 +215,38 @@ public class ConfirmationActivity extends AppCompatActivity
 
             String data = "";
 
-            HttpURLConnection httpURLConnection = null;
-            try {
+            HttpURLConnection urlConnection = null;
+            try
+            {
 
-                httpURLConnection = (HttpURLConnection) new URL(params[0]).openConnection();
-                httpURLConnection.setRequestMethod("PUT");
+                urlConnection = (HttpURLConnection) new URL(params[0]).openConnection();
+                urlConnection.setRequestMethod("PUT");
+                urlConnection.setDoOutput(true);
+                urlConnection.setDoInput(true);
+                urlConnection.setUseCaches(false);
+                urlConnection.setRequestProperty("Content-Type","application/json");
+                urlConnection.setRequestProperty("Accept","application/json");
 
-                httpURLConnection.setDoOutput(true);
 
-                DataOutputStream wr = new DataOutputStream(httpURLConnection.getOutputStream());
-                wr.writeBytes("elector=" + params[1]);
-                wr.flush();
-                wr.close();
+                OutputStreamWriter printout = new OutputStreamWriter(urlConnection.getOutputStream());
+                String jsonObjectStr = params[1];
+                printout.write(jsonObjectStr);
+                printout.flush();
+                printout.close();
 
-                InputStream in = httpURLConnection.getInputStream();
-                InputStreamReader inputStreamReader = new InputStreamReader(in);
+                data = urlConnection.getResponseMessage();
+                //data = urlConnection.getContent().toString();
 
-                int inputStreamData = inputStreamReader.read();
-                while (inputStreamData != -1) {
-                    char current = (char) inputStreamData;
-                    inputStreamData = inputStreamReader.read();
-                    data += current;
-                }
-            } catch (Exception e) {
+            }
+            catch (Exception e)
+            {
                 e.printStackTrace();
-                data = null;
-            } finally {
-                if (httpURLConnection != null) {
-                    httpURLConnection.disconnect();
+
+            }
+            finally
+            {
+                if (urlConnection != null) {
+                    urlConnection.disconnect();
                 }
             }
 
@@ -248,12 +258,7 @@ public class ConfirmationActivity extends AppCompatActivity
             super.onPostExecute(result);
             if(progressDialog.isShowing())
                 progressDialog.dismiss();
-            Log.e("TAG", result); // this is expecting a response code to be sent from your server upon receiving the POST data
-
-            if (result == null)
-                showAlertDialog("Could not send your vote. Check yout connection status and try again.");
-            else
-                showAlertDialog("Your vote was sent successfully!");
+            showAlertDialog(result);
         }
 
         @Override

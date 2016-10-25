@@ -40,7 +40,7 @@ public class HttpHandler
 
     //region [ Private Methods ]
 
-    private String convertStreamToString(InputStream stream)
+    public String convertStreamToString(InputStream stream)
     {
         BufferedReader reader = new BufferedReader(new InputStreamReader(stream));
         StringBuilder sb = new StringBuilder();
